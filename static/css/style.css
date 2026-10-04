@@ -1,0 +1,2734 @@
+
+/* =========================================================
+   ResQflow
+   Main CSS File
+   Clean and simple styling for the emergency route system
+   ========================================================= */
+
+
+/* =========================================================
+   1. BASIC COLORS AND SETTINGS
+   ========================================================= */
+
+:root {
+    --blue: #176fe5;
+    --blue-dark: #0d5dcc;
+
+    --text: #1d2939;
+    --text-light: #66758a;
+
+    --border: #e4eaf1;
+    --background: #f7f9fc;
+
+    --green: #188b57;
+    --red: #df3f45;
+    --yellow: #e9a51c;
+
+    --shadow: 0 10px 30px rgba(26, 43, 68, 0.14);
+    --big-shadow: 0 18px 45px rgba(20, 38, 64, 0.18);
+}
+
+
+/* =========================================================
+   2. GENERAL PAGE SETTINGS
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    color: var(--text);
+    background: white;
+    overflow: hidden;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   3. MAIN APPLICATION
+   ========================================================= */
+
+.app-shell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #eef2f6;
+}
+
+
+/* =========================================================
+   4. TOP HEADER / NAVBAR
+   ========================================================= */
+
+.topbar {
+    position: absolute;
+    z-index: 1200;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px 0 18px;
+
+    background: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid var(--border);
+}
+
+
+/* ResQflow logo and name */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.brand-logo {
+    width: 40px;
+    height: 40px;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+    box-shadow: 0 5px 15px rgba(23, 111, 229, 0.2);
+}
+
+.brand-logo img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.brand-text strong {
+    font-size: 17px;
+    letter-spacing: -0.25px;
+}
+
+.brand-text small {
+    margin-top: 4px;
+    font-size: 10px;
+    color: #7a8798;
+}
+
+
+/* Header buttons */
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.top-action,
+.account-button,
+.account-avatar {
+    height: 38px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    background: white;
+    color: #344255;
+
+    display: grid;
+    place-items: center;
+}
+
+.top-action {
+    width: 38px;
+}
+
+.top-action:hover {
+    background: #f5f8fb;
+    border-color: var(--border);
+}
+
+.top-action svg {
+    width: 19px;
+}
+
+.account-button {
+    padding: 0 15px;
+    font-size: 12px;
+}
+
+.account-button:hover {
+    background: #f6f8fb;
+    border-color: var(--border);
+}
+
+.account-avatar {
+    width: 38px;
+    border: none;
+    background: var(--blue);
+    color: white;
+    font-weight: bold;
+}
+
+.account-avatar.small {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 50%;
+
+    background: var(--blue);
+    color: white;
+
+    display: grid;
+    place-items: center;
+}
+
+
+/* =========================================================
+   5. LEFT SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: absolute;
+    z-index: 1100;
+
+    top: 68px;
+    bottom: 0;
+    left: 0;
+
+    width: 70px;
+
+    background: white;
+    border-right: 1px solid var(--border);
+
+    display: flex;
+    justify-content: center;
+
+    padding-top: 20px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.nav-item {
+    width: 54px;
+    min-height: 58px;
+
+    border: none;
+    border-radius: 13px;
+
+    background: white;
+    color: #738196;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    font-size: 9px;
+
+    transition: 0.18s;
+}
+
+.nav-item:hover {
+    background: #f4f8fd;
+    color: var(--blue);
+}
+
+.nav-item.active {
+    background: #edf5ff;
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.nav-icon {
+    display: grid;
+    place-items: center;
+}
+
+.nav-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+
+/* =========================================================
+   6. MAP AREA
+   ========================================================= */
+
+.map {
+    position: absolute;
+    z-index: 1;
+
+    left: 70px;
+    right: 0;
+    top: 68px;
+    bottom: 0;
+
+    background: #dce4ea;
+}
+
+
+/* Leaflet map styling */
+
+.leaflet-control-attribution {
+    font-size: 9px;
+}
+
+.leaflet-tooltip {
+    border: none;
+    border-radius: 8px;
+
+    box-shadow: var(--shadow);
+
+    font-size: 10px;
+    font-weight: bold;
+
+    padding: 6px 8px;
+}
+
+.leaflet-control-zoom {
+    display: none !important;
+}
+
+
+/* =========================================================
+   7. ROUTE SEARCH PANEL
+   ========================================================= */
+
+.route-panel {
+    position: absolute;
+    z-index: 1000;
+
+    top: 82px;
+    left: 82px;
+
+    width: 374px;
+    max-height: calc(100% - 98px);
+
+    overflow: auto;
+
+    background: rgba(255, 255, 255, 0.98);
+
+    border: 1px solid rgba(218, 226, 235, 0.95);
+    border-radius: 16px;
+
+    box-shadow: var(--big-shadow);
+
+    scrollbar-width: thin;
+}
+
+
+/* Panel heading */
+
+.panel-head {
+    padding: 18px 18px 14px;
+
+    border-bottom: 1px solid #eef2f6;
+
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.eyebrow-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: var(--blue);
+}
+
+.panel-head h1 {
+    margin: 7px 0 3px;
+
+    font-size: 19px;
+    letter-spacing: -0.35px;
+}
+
+.panel-head p {
+    margin: 0;
+
+    color: var(--text-light);
+    font-size: 10px;
+}
+
+
+/* Small icon buttons */
+
+.icon-button {
+    width: 32px;
+    height: 32px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: white;
+    color: #617087;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 20px;
+}
+
+.icon-button:hover {
+    background: #f7f9fb;
+    color: var(--text);
+}
+
+
+/* =========================================================
+   8. ROUTE INPUT FORM
+   ========================================================= */
+
+.route-form {
+    padding: 14px 16px 16px;
+}
+
+
+/* Start and destination box */
+
+.location-box {
+    position: relative;
+
+    padding: 9px 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: #fbfcfe;
+}
+
+.location-row {
+    min-height: 52px;
+
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) 30px 30px;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.location-row + .location-row {
+    margin-top: 3px;
+}
+
+
+/* Green and red route points */
+
+.route-point {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    justify-self: center;
+}
+
+.route-point.start {
+    background: #1aa064;
+    box-shadow: 0 0 0 4px #e7f6ef;
+}
+
+.route-point.end {
+    background: #e1494f;
+    box-shadow: 0 0 0 4px #fce9ea;
+}
+
+
+/* Input fields */
+
+.field {
+    position: relative;
+    min-width: 0;
+}
+
+.field label {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 9px;
+    color: #7d8998;
+}
+
+.field input {
+    width: 100%;
+    height: 25px;
+
+    padding: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #243247;
+
+    font-size: 12px;
+
+    text-overflow: ellipsis;
+}
+
+.field input::placeholder {
+    color: #9aa6b5;
+}
+
+.field input.location-selected {
+    font-weight: 650;
+}
+
+
+/* Input location buttons */
+
+.field-action {
+    width: 30px;
+    height: 30px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+    color: #7a899b;
+
+    display: grid;
+    place-items: center;
+}
+
+.field-action:hover {
+    background: #edf4fc;
+    color: var(--blue);
+}
+
+.field-action svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* Swap start/end button */
+
+.swap-button {
+    position: absolute;
+    z-index: 2;
+
+    left: 24px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 25px;
+    height: 25px;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 50%;
+
+    background: white;
+    color: #63738a;
+
+    display: grid;
+    place-items: center;
+
+    box-shadow: 0 2px 7px rgba(25, 45, 70, 0.08);
+}
+
+.swap-button:hover {
+    color: var(--blue);
+    border-color: #b9d3f3;
+}
+
+.swap-button svg {
+    width: 13px;
+    height: 13px;
+}
+
+
+/* =========================================================
+   9. LOCATION SUGGESTIONS
+   ========================================================= */
+
+.suggestions {
+    position: absolute;
+    z-index: 1600;
+
+    left: -1px;
+    right: -1px;
+    top: 51px;
+
+    overflow: hidden;
+
+    background: white;
+
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+
+    box-shadow: var(--shadow);
+}
+
+.suggestion-item {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 24px 1fr;
+
+    gap: 8px;
+
+    padding: 9px 10px;
+
+    border: none;
+    border-bottom: 1px solid #f0f3f6;
+
+    background: white;
+    color: var(--text);
+
+    text-align: left;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: #f5f9fe;
+}
+
+.suggestion-item b,
+.suggestion-item small {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.suggestion-item b {
+    font-size: 11px;
+}
+
+.suggestion-item small {
+    margin-top: 2px;
+
+    font-size: 9px;
+    color: #7a8796;
+}
+
+.suggestion-pin {
+    color: var(--blue);
+    font-size: 13px;
+}
+
+.suggestion-empty {
+    padding: 12px;
+
+    font-size: 10px;
+    color: #7b8796;
+}
+
+
+/* =========================================================
+   10. TRANSPORT MODE
+   ========================================================= */
+
+.section-label {
+    margin: 14px 0 7px;
+
+    font-size: 10px;
+    font-weight: 750;
+
+    color: #546278;
+}
+
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 5px;
+}
+
+.mode-pill {
+    height: 42px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: white;
+    color: #68778a;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 3px;
+
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.mode-pill svg {
+    width: 15px;
+    height: 15px;
+}
+
+.mode-pill:hover {
+    border-color: #c5d8ee;
+    color: var(--blue);
+    background: #f8fbff;
+}
+
+.mode-pill.active {
+    border-color: #b8d3f4;
+
+    background: #edf5ff;
+
+    color: var(--blue);
+
+    box-shadow: inset 0 0 0 1px #dceafb;
+}
+
+.hidden-select {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   11. EMERGENCY VEHICLE SELECT
+   ========================================================= */
+
+.emergency-row {
+    margin-top: 9px;
+
+    padding: 8px 10px;
+
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    background: #fff7f2;
+
+    border: 1px solid #f1dfd3;
+    border-radius: 9px;
+}
+
+.emergency-row label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #765e52;
+}
+
+.emergency-row select {
+    height: 31px;
+
+    padding: 0 8px;
+
+    border: 1px solid #e6d7cf;
+    border-radius: 7px;
+
+    background: white;
+
+    font-size: 10px;
+    outline: none;
+}
+
+
+/* =========================================================
+   12. MAIN SEARCH BUTTON
+   ========================================================= */
+
+.primary-button {
+    width: 100%;
+    height: 43px;
+
+    margin-top: 12px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #1e7bf0, #0f62d5);
+
+    color: white;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    box-shadow: 0 7px 18px rgba(23, 111, 229, 0.22);
+}
+
+.primary-button:hover {
+    filter: brightness(1.03);
+    transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    transform: none;
+}
+
+.primary-button svg {
+    width: 17px;
+}
+
+
+/* Loading spinner */
+
+.button-spinner {
+    width: 14px;
+    height: 14px;
+
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   13. MESSAGE / ERROR BOX
+   ========================================================= */
+
+.message {
+    margin: 0 16px 14px;
+
+    padding: 9px 10px;
+
+    border-radius: 9px;
+
+    background: #f2f7fd;
+    border: 1px solid #d9e8f9;
+
+    color: #45617e;
+
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.message.error {
+    background: #fff4f4;
+    border-color: #f2d4d5;
+    color: #a23b3f;
+}
+
+
+/* =========================================================
+   14. ROUTE RESULTS
+   ========================================================= */
+
+.route-results {
+    padding: 13px 16px 16px;
+
+    border-top: 1px solid #edf1f5;
+}
+
+.results-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 8px;
+
+    margin-bottom: 9px;
+}
+
+.results-head strong {
+    display: block;
+    font-size: 12px;
+}
+
+.results-head span {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 9px;
+    color: #8793a2;
+}
+
+.results-actions {
+    display: flex;
+    gap: 3px;
+}
+
+.text-button,
+.sort-button {
+    border: none;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #617188;
+
+    padding: 5px 6px;
+
+    font-size: 9px;
+}
+
+.text-button:hover,
+.sort-button:hover {
+    background: #f2f6fa;
+    color: var(--blue);
+}
+
+
+/* =========================================================
+   15. ROUTE CARDS
+   ========================================================= */
+
+.route-list {
+    display: grid;
+    gap: 7px;
+}
+
+.route-card {
+    position: relative;
+
+    padding: 11px 11px 10px;
+
+    border: 1px solid #e2e8ef;
+    border-radius: 11px;
+
+    background: white;
+
+    cursor: pointer;
+
+    transition: 0.16s;
+}
+
+.route-card:hover {
+    border-color: #bcd3ec;
+
+    box-shadow: 0 4px 12px rgba(27, 52, 81, 0.07);
+}
+
+.route-card.selected {
+    border-color: #8bb8ed;
+
+    background: #fbfdff;
+
+    box-shadow: 0 0 0 2px #eaf3ff;
+}
+
+.route-card.recommended {
+    border-left: 3px solid var(--green);
+}
+
+.route-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+}
+
+.route-title {
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.route-badge {
+    height: 21px;
+
+    padding: 0 7px;
+
+    border-radius: 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.route-badge.green {
+    background: #e8f7ef;
+    color: #18764d;
+}
+
+.route-badge.blue {
+    background: #edf5ff;
+    color: #2567b7;
+}
+
+.route-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    margin-top: 8px;
+
+    color: #67768a;
+
+    font-size: 9px;
+}
+
+.route-meta strong {
+    color: #253449;
+}
+
+.route-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 10px;
+}
+
+.route-start {
+    height: 28px;
+
+    padding: 0 10px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #edf5ff;
+    color: var(--blue);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.route-start:hover {
+    background: #dfeefe;
+}
+
+.route-score {
+    font-size: 8px;
+    color: #8995a3;
+}
+
+
+/* Route legend */
+
+.route-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 10px;
+
+    color: #8290a0;
+    font-size: 8px;
+}
+
+.legend-line {
+    display: inline-block;
+
+    width: 16px;
+    height: 3px;
+
+    margin-right: 4px;
+
+    border-radius: 4px;
+
+    vertical-align: middle;
+}
+
+.legend-line.recommended {
+    background: var(--green);
+}
+
+.legend-line.alternative {
+    background: var(--blue);
+}
+
+.legend-dot.signal {
+    display: inline-block;
+
+    width: 6px;
+    height: 6px;
+
+    margin: 0 4px 1px 0;
+
+    border-radius: 50%;
+
+    background: var(--yellow);
+}
+
+
+/* =========================================================
+   16. REOPEN ROUTE PANEL BUTTON
+   ========================================================= */
+
+.reopen-panel {
+    position: absolute;
+    z-index: 1050;
+
+    top: 82px;
+    left: 82px;
+
+    height: 42px;
+
+    padding: 0 13px;
+
+    border: 1px solid var(--border);
+    border-radius: 11px;
+
+    background: white;
+    color: #405067;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    box-shadow: var(--shadow);
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.reopen-panel svg {
+    width: 16px;
+}
+
+
+/* =========================================================
+   17. MAP SEARCH
+   ========================================================= */
+
+.map-search {
+    position: absolute;
+    z-index: 900;
+
+    top: 82px;
+    left: 474px;
+
+    width: 350px;
+    height: 44px;
+
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    background: white;
+
+    border: 1px solid #e1e7ee;
+    border-radius: 11px;
+
+    box-shadow: var(--shadow);
+}
+
+.map-search > svg {
+    width: 17px;
+    color: #66758a;
+}
+
+.map-search input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #243247;
+
+    font-size: 11px;
+}
+
+.map-search input::placeholder {
+    color: #9aa6b5;
+}
+
+.map-suggestions {
+    top: 47px;
+    left: 0;
+    right: 0;
+}
+
+
+/* =========================================================
+   18. MAP RIGHT SIDE CONTROLS
+   ========================================================= */
+
+.top-right-tools {
+    position: absolute;
+    z-index: 900;
+
+    top: 82px;
+    right: 18px;
+
+    width: 260px;
+}
+
+
+/* Map / Traffic buttons */
+
+.map-mode-switch {
+    display: flex;
+
+    padding: 4px;
+
+    gap: 2px;
+
+    background: white;
+
+    border: 1px solid #e1e7ee;
+    border-radius: 11px;
+
+    box-shadow: var(--shadow);
+}
+
+.map-mode {
+    height: 34px;
+
+    flex: 1;
+
+    border: none;
+    border-radius: 8px;
+
+    background: white;
+    color: #647288;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.map-mode svg {
+    width: 15px;
+}
+
+.map-mode:hover {
+    background: #f5f8fb;
+}
+
+.map-mode.active {
+    background: #edf5ff;
+    color: var(--blue);
+}
+
+.map-mode:not(.active) {
+    opacity: 0.8;
+}
+
+
+/* =========================================================
+   19. TRAFFIC INFORMATION CARD
+   ========================================================= */
+
+.traffic-card {
+    margin-top: 7px;
+
+    padding: 10px 11px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 6px 12px;
+
+    background: rgba(255, 255, 255, 0.98);
+
+    border: 1px solid #e1e7ee;
+    border-radius: 11px;
+
+    box-shadow: var(--shadow);
+
+    font-size: 13px;
+    color: #66758a;
+}
+
+.traffic-title {
+    grid-column: 1 / -1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: #2e3c50;
+}
+
+.live-pill {
+    display: flex !important;
+    align-items: center;
+    gap: 3px;
+
+    color: var(--green) !important;
+
+    font-size: 8px !important;
+}
+
+.live-pill i {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #1ca76a;
+}
+
+.traffic-card > span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.traffic-dot {
+    width: 7px;
+    height: 7px;
+
+    display: inline-block;
+
+    border-radius: 50%;
+}
+
+.traffic-dot.smooth {
+    background: #1aa064;
+}
+
+.traffic-dot.moderate {
+    background: #e9a51c;
+}
+
+.traffic-dot.heavy {
+    background: #e35a45;
+}
+
+.traffic-dot.blocked {
+    background: #a9242a;
+}
+
+
+/* =========================================================
+   20. MAP STYLE / SATELLITE BUTTON
+   ========================================================= */
+
+.map-style-card {
+    position: absolute;
+    z-index: 900;
+
+    right: 18px;
+    bottom: 20px;
+
+    width: 82px;
+
+    overflow: hidden;
+
+    background: white;
+
+    border: 1px solid #e1e7ee;
+    border-radius: 11px;
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+}
+
+.map-style-card:hover {
+    transform: translateY(-1px);
+
+    box-shadow: 0 12px 25px rgba(24, 44, 70, 0.18);
+}
+
+.map-style-card.active {
+    outline: 2px solid #8ab9ee;
+    outline-offset: 1px;
+}
+
+.satellite-preview {
+    height: 54px;
+
+    background:
+        #617b59
+        center / cover no-repeat
+        url("/static/img/satellite-preview.svg");
+}
+
+.map-style-copy {
+    padding: 7px 8px;
+}
+
+.map-style-copy strong {
+    display: block;
+    font-size: 9px;
+}
+
+.map-style-copy span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #8894a2;
+
+    font-size: 8px;
+}
+
+.map-style-card.active .map-style-copy strong {
+    color: var(--blue);
+}
+
+
+/* =========================================================
+   21. MAP ZOOM AND LOCATION CONTROLS
+   ========================================================= */
+
+.map-controls {
+    position: absolute;
+    z-index: 900;
+
+    right: 18px;
+    bottom: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.map-controls button {
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid #e1e7ee;
+    border-radius: 10px;
+
+    background: white;
+    color: #55667d;
+
+    display: grid;
+    place-items: center;
+
+    box-shadow: var(--shadow);
+}
+
+.map-controls button:hover {
+    background: #f7fbff;
+    color: var(--blue);
+}
+
+.zoom-stack {
+    display: grid;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    box-shadow: var(--shadow);
+}
+
+.zoom-stack button {
+    border-radius: 0;
+    border-bottom: none;
+
+    font-size: 20px;
+}
+
+.zoom-stack button + button {
+    border-top: 1px solid #e7ecf1;
+}
+
+
+/* =========================================================
+   22. MAP STATUS
+   ========================================================= */
+
+.map-status {
+    position: absolute;
+    z-index: 850;
+
+    left: 474px;
+    bottom: 20px;
+
+    padding: 8px 11px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    border: 1px solid #e1e7ee;
+    border-radius: 10px;
+
+    box-shadow: var(--shadow);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #1ba369;
+
+    box-shadow: 0 0 0 4px #e7f6ef;
+}
+
+.map-status strong {
+    display: block;
+    font-size: 9px;
+}
+
+.map-status small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #8a96a5;
+
+    font-size: 8px;
+}
+
+
+/* =========================================================
+   23. ROUTE DETAILS PANEL
+   ========================================================= */
+
+.app-shell:has(.detail-sheet:not(.hidden)) .map-status {
+    display: none;
+}
+
+.detail-sheet {
+    position: absolute;
+    z-index: 980;
+
+    left: 474px;
+    right: 116px;
+    bottom: 20px;
+
+    max-height: 46%;
+
+    overflow: auto;
+
+    padding: 14px;
+
+    background: rgba(255, 255, 255, 0.98);
+
+    border: 1px solid #e0e7ef;
+    border-radius: 14px;
+
+    box-shadow: var(--big-shadow);
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 12px;
+}
+
+.sheet-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.detail-kicker {
+    font-size: 8px;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    font-weight: 800;
+
+    color: var(--blue);
+}
+
+.sheet-header h2 {
+    margin: 4px 0 2px;
+
+    font-size: 16px;
+}
+
+.sheet-header p {
+    margin: 0;
+
+    color: #7b8796;
+
+    font-size: 9px;
+}
+
+
+/* Route statistics */
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 6px;
+
+    margin-top: 12px;
+}
+
+.metric {
+    padding: 9px 10px;
+
+    border: 1px solid #e8edf2;
+    border-radius: 9px;
+
+    background: #fbfcfe;
+}
+
+.metric span {
+    display: block;
+
+    font-size: 8px;
+    color: #8390a0;
+}
+
+.metric strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 12px;
+}
+
+.metric strong.good {
+    color: var(--green);
+}
+
+
+/* Details lower section */
+
+.detail-lower {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 8px;
+}
+
+.directions-card,
+.analysis-card {
+    padding: 10px;
+
+    border: 1px solid #e8edf2;
+    border-radius: 10px;
+
+    background: white;
+}
+
+.subhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 8px;
+}
+
+.subhead strong {
+    font-size: 10px;
+}
+
+.subhead span {
+    font-size: 8px;
+    color: #8a95a3;
+}
+
+
+/* Turn-by-turn directions */
+
+.turn-list {
+    display: grid;
+    gap: 3px;
+}
+
+.turn-list > div {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 6px 0;
+
+    border-bottom: 1px solid #f0f3f6;
+}
+
+.turn-list > div:last-child {
+    border-bottom: none;
+}
+
+.turn-list i {
+    width: 20px;
+    height: 20px;
+
+    border-radius: 50%;
+
+    background: #edf5ff;
+    color: var(--blue);
+
+    display: grid;
+    place-items: center;
+
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.turn-list span {
+    font-size: 9px;
+}
+
+.turn-list small {
+    font-size: 8px;
+    color: #8a95a3;
+}
+
+
+/* Route analysis */
+
+.factor-list {
+    display: grid;
+    gap: 5px;
+}
+
+.factor {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding-bottom: 5px;
+
+    border-bottom: 1px dashed #e8edf2;
+
+    color: #788697;
+
+    font-size: 8px;
+}
+
+.factor b {
+    color: #2c3b4e;
+}
+
+
+/* Traffic signal note */
+
+.signal-note {
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 9px;
+
+    padding: 8px;
+
+    background: #f4f8fc;
+
+    border-radius: 8px;
+
+    color: #5e6f84;
+
+    font-size: 8px;
+
+    line-height: 1.35;
+}
+
+.signal-icon {
+    color: var(--blue);
+
+    display: grid;
+    place-items: center;
+}
+
+.signal-icon svg {
+    width: 17px;
+}
+
+
+/* =========================================================
+   24. MOBILE NAVIGATION
+   ========================================================= */
+
+.mobile-nav {
+    display: none;
+}
+
+
+/* =========================================================
+   25. MODAL WINDOWS
+   ========================================================= */
+
+.modal {
+    position: fixed;
+    z-index: 3000;
+
+    inset: 0;
+
+    padding: 18px;
+
+    background: rgba(19, 31, 47, 0.36);
+
+    backdrop-filter: blur(3px);
+
+    display: grid;
+    place-items: center;
+}
+
+.modal-card {
+    position: relative;
+
+    width: min(430px, 100%);
+    max-height: 90vh;
+
+    overflow: auto;
+
+    padding: 20px;
+
+    background: white;
+
+    border-radius: 16px;
+
+    box-shadow: 0 24px 70px rgba(14, 31, 52, 0.25);
+}
+
+.modal-card.wide {
+    width: min(620px, 100%);
+}
+
+.modal-close {
+    position: absolute;
+
+    top: 12px;
+    right: 12px;
+
+    width: 31px;
+    height: 31px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: white;
+
+    color: #68778a;
+
+    font-size: 19px;
+}
+
+
+/* Modal logo */
+
+.modal-brand {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 16px;
+}
+
+.modal-brand img {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+}
+
+.modal-brand strong,
+.modal-brand span {
+    display: block;
+}
+
+.modal-brand strong {
+    font-size: 14px;
+}
+
+.modal-brand span {
+    margin-top: 3px;
+
+    font-size: 9px;
+    color: #8793a1;
+}
+
+
+/* =========================================================
+   26. LOGIN / REGISTER TABS
+   ========================================================= */
+
+.auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    padding: 3px;
+
+    margin-bottom: 14px;
+
+    background: #f3f6f9;
+
+    border-radius: 9px;
+}
+
+.auth-tabs button {
+    height: 34px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: #718095;
+
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.auth-tabs button.active {
+    background: white;
+    color: var(--blue);
+
+    box-shadow: 0 1px 5px rgba(30, 51, 75, 0.08);
+}
+
+
+/* Forms */
+
+.modal-card form {
+    display: grid;
+    gap: 7px;
+}
+
+.modal-card label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #5e6d80;
+}
+
+.modal-card input,
+.modal-card select {
+    width: 100%;
+    height: 39px;
+
+    padding: 0 10px;
+
+    border: 1px solid #dfe6ee;
+    border-radius: 8px;
+
+    outline: none;
+
+    font-size: 10px;
+}
+
+.modal-card input:focus,
+.modal-card select:focus {
+    border-color: #8db9ea;
+
+    box-shadow: 0 0 0 3px #edf5ff;
+}
+
+
+/* =========================================================
+   27. MODAL HEADINGS
+   ========================================================= */
+
+.modal-head {
+    margin-bottom: 14px;
+}
+
+.modal-head strong {
+    display: block;
+    font-size: 16px;
+}
+
+.modal-head span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #8793a2;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   28. HISTORY
+   ========================================================= */
+
+.history-list {
+    display: grid;
+    gap: 7px;
+
+    max-height: 60vh;
+
+    overflow: auto;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px;
+
+    border: 1px solid #e5ebf1;
+    border-radius: 9px;
+}
+
+.history-item b,
+.history-item small {
+    display: block;
+}
+
+.history-item b {
+    font-size: 10px;
+}
+
+.history-item small {
+    margin-top: 4px;
+
+    font-size: 8px;
+    color: #8591a0;
+}
+
+.history-item > span {
+    font-size: 8px;
+
+    color: var(--blue);
+
+    white-space: nowrap;
+}
+
+.empty-state {
+    padding: 30px;
+
+    text-align: center;
+
+    color: #8894a2;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   29. SETTINGS
+   ========================================================= */
+
+.settings-list {
+    display: grid;
+    gap: 7px;
+}
+
+.setting-row {
+    min-height: 58px;
+
+    padding: 10px 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border: 1px solid #e5ebf1;
+    border-radius: 9px;
+
+    background: #fbfcfd;
+
+    cursor: pointer;
+}
+
+.setting-row strong,
+.setting-row small {
+    display: block;
+}
+
+.setting-row strong {
+    font-size: 10px;
+}
+
+.setting-row small {
+    margin-top: 3px;
+
+    font-size: 8px;
+    color: #8a96a4;
+}
+
+.setting-row select {
+    width: auto;
+    min-width: 115px;
+}
+
+
+/* Toggle switch */
+
+.setting-toggle {
+    appearance: none;
+
+    width: 40px !important;
+    height: 23px !important;
+
+    padding: 0 !important;
+
+    border: none !important;
+    border-radius: 20px !important;
+
+    background: #cbd5df !important;
+
+    position: relative;
+
+    cursor: pointer;
+}
+
+.setting-toggle::before {
+    content: "";
+
+    position: absolute;
+
+    width: 17px;
+    height: 17px;
+
+    left: 3px;
+    top: 3px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    transition: 0.18s;
+}
+
+.setting-toggle:checked {
+    background: var(--blue) !important;
+}
+
+.setting-toggle:checked::before {
+    transform: translateX(17px);
+}
+
+
+/* =========================================================
+   30. ACCOUNT MENU
+   ========================================================= */
+
+.account-popover {
+    position: absolute;
+    z-index: 2500;
+
+    top: 58px;
+    right: 18px;
+
+    width: 220px;
+
+    padding: 8px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    box-shadow: var(--big-shadow);
+}
+
+.account-popover-head {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 7px;
+
+    margin-bottom: 5px;
+
+    border-bottom: 1px solid #eef2f5;
+}
+
+.account-popover-head strong,
+.account-popover-head small {
+    display: block;
+}
+
+.account-popover-head strong {
+    font-size: 10px;
+}
+
+.account-popover-head small {
+    margin-top: 2px;
+
+    font-size: 8px;
+    color: #8793a1;
+}
+
+.account-popover > button {
+    width: 100%;
+    height: 34px;
+
+    padding: 0 8px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: white;
+
+    text-align: left;
+
+    font-size: 9px;
+    color: #516075;
+}
+
+.account-popover > button:hover {
+    background: #f4f7fa;
+}
+
+.account-popover > button:last-child {
+    color: #c0393d;
+}
+
+
+/* =========================================================
+   31. MAP MARKERS
+   ========================================================= */
+
+.start-marker,
+.end-marker,
+.user-marker {
+    width: 22px;
+    height: 22px;
+
+    border: 3px solid white;
+
+    border-radius: 50% 50% 50% 0;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+
+    transform: rotate(-45deg);
+}
+
+.start-marker {
+    background: #18a065;
+}
+
+.end-marker {
+    background: #df444b;
+}
+
+.user-marker {
+    background: #2b7cf1;
+}
+
+
+/* Traffic signal marker */
+
+.signal-marker {
+    width: 10px;
+    height: 10px;
+
+    border: 2px solid white;
+    border-radius: 50%;
+
+    background: #e4a41b;
+
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+}
+
+
+/* =========================================================
+   32. TABLET RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 1200px) and (min-width: 801px) {
+
+    .route-panel {
+        width: 350px;
+    }
+
+    .map-search {
+        left: 448px;
+        width: 300px;
+    }
+
+    .map-status {
+        left: 448px;
+    }
+
+    .detail-sheet {
+        left: 448px;
+        right: 116px;
+    }
+
+    .mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .top-right-tools {
+        width: 235px;
+    }
+}
+
+
+/* =========================================================
+   33. MOBILE RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    body {
+        overflow: hidden;
+    }
+
+    /* Header */
+
+    .topbar {
+        height: 60px;
+        padding: 0 12px;
+    }
+
+    .brand-logo {
+        width: 36px;
+        height: 36px;
+
+        border-radius: 10px;
+    }
+
+    .brand-text strong {
+        font-size: 15px;
+    }
+
+    .brand-text small {
+        font-size: 8px;
+    }
+
+    .top-action {
+        display: none;
+    }
+
+    .account-button {
+        height: 34px;
+        padding: 0 11px;
+    }
+
+
+    /* Sidebar disappears on mobile */
+
+    .sidebar {
+        display: none;
+    }
+
+
+    /* Full width map */
+
+    .map {
+        left: 0;
+        top: 60px;
+        bottom: 0;
+    }
+
+
+    /* Route panel */
+
+    .route-panel {
+        top: 70px;
+        left: 10px;
+        right: 10px;
+
+        width: auto;
+
+        max-height: 55vh;
+
+        border-radius: 15px;
+    }
+
+    .panel-head {
+        padding: 14px 14px 11px;
+    }
+
+    .panel-head h1 {
+        font-size: 16px;
+    }
+
+    .route-form {
+        padding: 11px 13px 13px;
+    }
+
+    .mode-pill {
+        height: 38px;
+    }
+
+    .route-results {
+        padding: 11px 13px 13px;
+    }
+
+
+    /* Search */
+
+    .map-search {
+        left: 10px;
+        right: 10px;
+
+        top: calc(55vh + 78px);
+
+        width: auto;
+        height: 42px;
+    }
+
+
+    /* Map controls */
+
+    .top-right-tools {
+        top: auto;
+        right: 10px;
+        bottom: 126px;
+
+        width: auto;
+    }
+
+    .map-mode-switch {
+        padding: 3px;
+        border-radius: 10px;
+    }
+
+    .map-mode {
+        height: 34px;
+        min-width: 72px;
+    }
+
+    .traffic-card {
+        display: none;
+    }
+
+
+    /* Satellite button */
+
+    .map-style-card {
+        right: 10px;
+        bottom: 80px;
+
+        width: 74px;
+    }
+
+    .satellite-preview {
+        height: 47px;
+    }
+
+    .map-style-copy {
+        padding: 6px 7px;
+    }
+
+
+    /* Map buttons */
+
+    .map-controls {
+        right: 10px;
+        bottom: 80px;
+
+        transform: translateY(-88px);
+    }
+
+    .map-status {
+        display: none;
+    }
+
+
+    /* Details */
+
+    .detail-sheet {
+        left: 10px;
+        right: 10px;
+        bottom: 72px;
+
+        max-height: 50vh;
+
+        border-radius: 14px;
+
+        padding: 12px;
+    }
+
+    .metric-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .detail-lower {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-card {
+        display: none;
+    }
+
+
+    /* Mobile bottom navigation */
+
+    .mobile-nav {
+        position: absolute;
+        z-index: 1200;
+
+        left: 7px;
+        right: 7px;
+        bottom: 7px;
+
+        height: 58px;
+
+        padding: 4px;
+
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+
+        background: rgba(255, 255, 255, 0.97);
+
+        border: 1px solid #e2e8ee;
+        border-radius: 15px;
+
+        box-shadow: var(--big-shadow);
+    }
+
+    .mobile-nav button {
+        border: none;
+        border-radius: 11px;
+
+        background: transparent;
+
+        color: #718095;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        gap: 3px;
+
+        font-size: 8px;
+    }
+
+    .mobile-nav button.active {
+        background: #edf5ff;
+        color: var(--blue);
+
+        font-weight: 750;
+    }
+
+    .mobile-nav svg {
+        width: 17px;
+        height: 17px;
+    }
+
+
+    /* Reopen panel */
+
+    .reopen-panel {
+        left: 10px;
+        top: 70px;
+    }
+
+
+    /* Modal */
+
+    .modal {
+        padding: 10px;
+    }
+
+    .account-popover {
+        top: 53px;
+        right: 10px;
+    }
+
+    .detail-sheet .sheet-header h2 {
+        font-size: 14px;
+    }
+}
+
+
+/* =========================================================
+   34. SMALL MOBILE DEVICES
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+    .topbar {
+        padding: 0 9px;
+    }
+
+    .brand-text small {
+        display: none;
+    }
+
+    .brand-text strong {
+        font-size: 14px;
+    }
+
+
+    /* Route panel */
+
+    .route-panel {
+        max-height: 54vh;
+    }
+
+    .location-row {
+        grid-template-columns: 16px minmax(0, 1fr) 29px 29px;
+    }
+
+    .mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    /* Map search */
+
+    .map-search {
+        top: calc(54vh + 77px);
+    }
+
+    .top-right-tools {
+        bottom: 123px;
+    }
+
+    .map-style-card {
+        bottom: 78px;
+    }
+
+    .map-controls {
+        bottom: 78px;
+    }
+
+
+    /* Details */
+
+    .detail-sheet {
+        bottom: 70px;
+        max-height: 52vh;
+    }
+
+    .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sheet-actions .route-badge {
+        display: none;
+    }
+
+    .route-card-footer {
+        margin-top: 8px;
+    }
+
+    .route-meta {
+        gap: 8px;
+    }
+
+
+    /* Bottom navigation */
+
+    .mobile-nav {
+        height: 56px;
+    }
+
+    .modal-card {
+        padding: 17px;
+    }
+}
+
+
+/* =========================================================
+   35. SHORT MOBILE SCREEN
+   ========================================================= */
+
+@media (max-height: 680px) and (max-width: 800px) {
+
+    .route-panel {
+        max-height: 45vh;
+    }
+
+    .map-search {
+        top: calc(45vh + 77px);
+    }
+
+    .detail-sheet {
+        max-height: 47vh;
+    }
+}

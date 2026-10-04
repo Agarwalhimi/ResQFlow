@@ -1,0 +1,32 @@
+{
+  "name": "ResQFlow Emergency Route Planner",
+  "short_name": "ResQFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#176fe5",
+  "description": "Emergency route planning and route analysis prototype.",
+
+  "icons": [
+    {
+      "src": "/static/img/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/img/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "categories": [
+    "navigation",
+    "maps",
+    "utilities"
+  ],
+
+  "orientation": "portrait-primary"
+}
