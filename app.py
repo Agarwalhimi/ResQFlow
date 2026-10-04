@@ -3,22 +3,12 @@
 # app.py
 # ============================================================
 
-from flask import (
-    Flask,
-    jsonify,
-    render_template,
-    request,
-    session
-)
-
+from flask import Flask, jsonify, render_template, request, session
 from pathlib import Path
 from functools import wraps
 from datetime import datetime, timezone
 
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import sqlite3
 import os
@@ -48,15 +38,21 @@ else:
     DSA_PROGRAM = BASE_DIR / "dsa_algorithms"
 
 
+# Secret key
 app.secret_key = os.environ.get(
     "RESQFLOW_SECRET",
-    "resqflow-development-secret-change-me"
+    "change-this-secret-key-in-production"
 )
 
+
+# Session configuration
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_SECURE=os.environ.get(
+        "FLASK_ENV",
+        ""
+    ).lower() == "production",
     JSON_SORT_KEYS=False
 )
 
@@ -66,8 +62,12 @@ app.config.update(
 # ============================================================
 
 def get_database():
+    """
+    Create and return a SQLite database connection.
+    """
+
     connection = sqlite3.connect(
-        DATABASE,
+        str(DATABASE),
         timeout=10
     )
 
@@ -77,6 +77,9 @@ def get_database():
 
 
 def initialize_database():
+    """
+    Create all required tables if they do not already exist.
+    """
 
     connection = get_database()
 
@@ -104,6 +107,7 @@ def initialize_database():
 
             FOREIGN KEY(user_id)
             REFERENCES users(id)
+            ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS incidents (
@@ -135,14 +139,21 @@ def initialize_database():
 
 
 def current_time():
+    """
+    Return UTC timestamp.
+    """
+
     return datetime.now(timezone.utc).isoformat()
 
 
 # ============================================================
-# 3. LOGIN
+# 3. LOGIN HELPERS
 # ============================================================
 
 def login_required(function):
+    """
+    Protect API routes that require authentication.
+    """
 
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -160,6 +171,9 @@ def login_required(function):
 
 
 def get_current_user():
+    """
+    Return currently logged-in user.
+    """
 
     user_id = session.get("user_id")
 
@@ -170,7 +184,12 @@ def get_current_user():
 
     user = connection.execute(
         """
-        SELECT id, name, email, role, created_at
+        SELECT
+            id,
+            name,
+            email,
+            role,
+            created_at
         FROM users
         WHERE id = ?
         """,
@@ -179,19 +198,17 @@ def get_current_user():
 
     connection.close()
 
-    return dict(user) if user else None
+    if not user:
+        return None
+
+    return dict(user)
 
 
 # ============================================================
-# 4. DISTANCE
+# 4. DISTANCE CALCULATION
 # ============================================================
 
-def calculate_distance(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-):
+def calculate_distance(lat1, lon1, lat2, lon2):
 
     earth_radius = 6371000.0
 
@@ -329,7 +346,9 @@ def local_geocode(text):
     for name, coordinates in DEMO_LOCATIONS.items():
 
         if len(name) >= 4 and (
-            name in key or key in name
+            name in key
+            or
+            key in name
         ):
 
             latitude, longitude = coordinates
@@ -401,8 +420,12 @@ def geocode_location(text):
                 "source": "OpenStreetMap"
             }
 
-    except Exception:
-        pass
+    except Exception as error:
+
+        app.logger.warning(
+            "Geocoding failed: %s",
+            error
+        )
 
     return local_result
 
@@ -411,27 +434,24 @@ def geocode_location(text):
 # 8. LOCATION SEARCH
 # ============================================================
 
-def search_locations(
-    text,
-    limit=5
-):
+def search_locations(text, limit=5):
 
     text = str(text or "").strip()
 
     if len(text) < 2:
         return []
 
-    results = []
-
     try:
+
+        safe_limit = min(
+            max(int(limit), 1),
+            8
+        )
 
         parameters = urllib.parse.urlencode({
             "q": text,
             "format": "jsonv2",
-            "limit": min(
-                max(int(limit), 1),
-                8
-            ),
+            "limit": safe_limit,
             "countrycodes": "in",
             "addressdetails": 1
         })
@@ -459,6 +479,8 @@ def search_locations(
                 response.read().decode("utf-8")
             )
 
+        results = []
+
         for item in data:
 
             results.append({
@@ -471,34 +493,41 @@ def search_locations(
                 "source": "OpenStreetMap"
             })
 
-    except Exception:
-        pass
+        if results:
+            return results[:safe_limit]
+
+    except Exception as error:
+
+        app.logger.warning(
+            "Location search failed: %s",
+            error
+        )
 
     # Local fallback
-    if not results:
+    results = []
 
-        key = re.sub(
-            r"\s+",
-            " ",
-            text.lower()
-        ).strip()
+    key = re.sub(
+        r"\s+",
+        " ",
+        text.lower()
+    ).strip()
 
-        for name, coordinates in DEMO_LOCATIONS.items():
+    for name, coordinates in DEMO_LOCATIONS.items():
 
-            if (
-                key in name
-                or
-                name in key
-            ):
+        if (
+            key in name
+            or
+            name in key
+        ):
 
-                latitude, longitude = coordinates
+            latitude, longitude = coordinates
 
-                results.append({
-                    "lat": latitude,
-                    "lng": longitude,
-                    "display": name.title(),
-                    "source": "ResQFlow demo fallback"
-                })
+            results.append({
+                "lat": latitude,
+                "lng": longitude,
+                "display": name.title(),
+                "source": "ResQFlow demo fallback"
+            })
 
     return results[:limit]
 
@@ -507,10 +536,7 @@ def search_locations(
 # 9. REVERSE GEOCODING
 # ============================================================
 
-def reverse_geocode(
-    latitude,
-    longitude
-):
+def reverse_geocode(latitude, longitude):
 
     try:
 
@@ -547,8 +573,12 @@ def reverse_geocode(
         if data.get("display_name"):
             return data["display_name"]
 
-    except Exception:
-        pass
+    except Exception as error:
+
+        app.logger.warning(
+            "Reverse geocoding failed: %s",
+            error
+        )
 
     return f"{latitude:.5f}, {longitude:.5f}"
 
@@ -563,8 +593,13 @@ def get_selected_location(value):
 
         try:
 
-            latitude = float(value["lat"])
-            longitude = float(value["lng"])
+            latitude = float(
+                value["lat"]
+            )
+
+            longitude = float(
+                value["lng"]
+            )
 
             display = str(
                 value.get(
@@ -574,6 +609,7 @@ def get_selected_location(value):
             ).strip()
 
             if not display:
+
                 display = (
                     f"{latitude:.5f}, "
                     f"{longitude:.5f}"
@@ -584,6 +620,7 @@ def get_selected_location(value):
                 and
                 -180 <= longitude <= 180
             ):
+
                 return None
 
             return {
@@ -601,6 +638,7 @@ def get_selected_location(value):
             TypeError,
             ValueError
         ):
+
             return None
 
     if isinstance(value, str):
@@ -614,11 +652,7 @@ def get_selected_location(value):
 # 11. DEMO ROUTES
 # ============================================================
 
-def create_demo_routes(
-    start,
-    end,
-    vehicle="car"
-):
+def create_demo_routes(start, end, vehicle="car"):
 
     start_lat = start["lat"]
     start_lng = start["lng"]
@@ -682,9 +716,13 @@ def create_demo_routes(
     ]
 
     speed_kmh = {
+
         "car": 34,
+
         "bike": 28,
+
         "walk": 5
+
     }.get(
         vehicle,
         34
@@ -695,9 +733,16 @@ def create_demo_routes(
     for middle_latitude, middle_longitude in middle_points:
 
         coordinates = [
+
             [start_lng, start_lat],
-            [middle_longitude, middle_latitude],
+
+            [
+                middle_longitude,
+                middle_latitude
+            ],
+
             [end_lng, end_lat]
+
         ]
 
         distance = 0
@@ -707,6 +752,7 @@ def create_demo_routes(
         ):
 
             first = coordinates[index]
+
             second = coordinates[index + 1]
 
             distance += calculate_distance(
@@ -729,8 +775,11 @@ def create_demo_routes(
             "duration": duration,
 
             "geometry": {
+
                 "type": "LineString",
+
                 "coordinates": coordinates
+
             },
 
             "legs": [],
@@ -738,6 +787,7 @@ def create_demo_routes(
             "source": "DEMO_FALLBACK",
 
             "profile": vehicle
+
         })
 
     return routes
@@ -753,7 +803,6 @@ def get_osrm_routes(
     vehicle="car"
 ):
 
-    # Correct OSRM/OpenStreetMap routing profiles
     routing_servers = {
 
         "car": (
@@ -772,6 +821,7 @@ def get_osrm_routes(
             "routed-foot",
             "driving"
         )
+
     }
 
     server, profile = routing_servers.get(
@@ -785,10 +835,15 @@ def get_osrm_routes(
     )
 
     parameters = urllib.parse.urlencode({
+
         "alternatives": "true",
+
         "steps": "true",
+
         "overview": "full",
+
         "geometries": "geojson"
+
     })
 
     url = (
@@ -831,8 +886,12 @@ def get_osrm_routes(
 
             return routes
 
-    except Exception:
-        pass
+    except Exception as error:
+
+        app.logger.warning(
+            "OSRM routing failed: %s",
+            error
+        )
 
     return create_demo_routes(
         start,
@@ -884,6 +943,7 @@ def calculate_traffic_delay(
         "MEDIUM": 0.10,
 
         "HIGH": 0.22
+
     }
 
     return (
@@ -995,6 +1055,7 @@ def create_traffic_segments(
                     seed,
                     index
                 )
+
         })
 
     return segments
@@ -1015,7 +1076,12 @@ def analyze_route(
 ):
 
     distance_km = (
-        float(route.get("distance", 0))
+        float(
+            route.get(
+                "distance",
+                0
+            )
+        )
         / 1000
     )
 
@@ -1034,18 +1100,21 @@ def analyze_route(
         f"{round(distance_km, 2)}"
     )
 
-    traffic_segments = (
-        create_traffic_segments(
-            route,
-            seed
-        )
+    traffic_segments = create_traffic_segments(
+        route,
+        seed
     )
 
     counts = {
+
         "FREE": 0,
+
         "LOW": 0,
+
         "MEDIUM": 0,
+
         "HIGH": 0
+
     }
 
     for segment in traffic_segments:
@@ -1053,6 +1122,7 @@ def analyze_route(
         level = segment["level"]
 
         if level in counts:
+
             counts[level] += 1
 
     traffic = max(
@@ -1070,13 +1140,15 @@ def analyze_route(
         base_duration
     )
 
-    emergency_mode = (
-        mode in [
-            "EMERGENCY",
-            "VIP",
-            "DISASTER"
-        ]
-    )
+    emergency_mode = mode in {
+
+        "EMERGENCY",
+
+        "VIP",
+
+        "DISASTER"
+
+    }
 
     signal_delay = calculate_signal_delay(
         signal_count,
@@ -1087,32 +1159,53 @@ def analyze_route(
     mode_weights = {
 
         "NORMAL": {
+
             "time": 1.15,
+
             "traffic": 1.0,
+
             "signal": 1.0,
+
             "distance": 10
+
         },
 
         "EMERGENCY": {
+
             "time": 1.0,
+
             "traffic": 0.8,
+
             "signal": 1.25,
+
             "distance": 8
+
         },
 
         "VIP": {
+
             "time": 0.95,
+
             "traffic": 0.7,
+
             "signal": 1.10,
+
             "distance": 7
+
         },
 
         "DISASTER": {
+
             "time": 0.90,
+
             "traffic": 0.65,
+
             "signal": 1.20,
+
             "distance": 6
+
         }
+
     }
 
     weights = mode_weights.get(
@@ -1129,30 +1222,50 @@ def analyze_route(
         "Police": 0.96,
 
         "General": 1.0
+
     }.get(
         emergency_type,
         1.0
     )
 
     score = (
-        base_duration * weights["time"]
+
+        base_duration
+        * weights["time"]
+
         +
-        traffic_delay * weights["traffic"]
+
+        traffic_delay
+        * weights["traffic"]
+
         +
-        signal_delay * weights["signal"]
+
+        signal_delay
+        * weights["signal"]
+
         +
-        distance_km * weights["distance"]
+
+        distance_km
+        * weights["distance"]
+
     )
 
     if mode != "NORMAL":
+
         score *= emergency_factor
 
     estimated_duration = (
+
         base_duration
+
         +
+
         traffic_delay
+
         +
+
         signal_delay
+
     )
 
     return {
@@ -1162,13 +1275,20 @@ def analyze_route(
         "vehicle": vehicle,
 
         "distance_km":
-            round(distance_km, 2),
+            round(
+                distance_km,
+                2
+            ),
 
         "base_duration_s":
-            round(base_duration),
+            round(
+                base_duration
+            ),
 
         "estimated_duration_s":
-            round(estimated_duration),
+            round(
+                estimated_duration
+            ),
 
         "traffic":
             traffic,
@@ -1183,13 +1303,20 @@ def analyze_route(
             signal_count,
 
         "traffic_delay_s":
-            round(traffic_delay),
+            round(
+                traffic_delay
+            ),
 
         "signal_delay_s":
-            round(signal_delay),
+            round(
+                signal_delay
+            ),
 
         "score":
-            round(score, 2),
+            round(
+                score,
+                2
+            ),
 
         "status":
             "ALTERNATIVE",
@@ -1198,6 +1325,7 @@ def analyze_route(
 
         "mode":
             mode
+
     }
 
 
@@ -1221,12 +1349,19 @@ def normalize_mode(data):
         )
     )
 
-    if mode not in {
+    allowed_modes = {
+
         "NORMAL",
+
         "EMERGENCY",
+
         "VIP",
+
         "DISASTER"
-    }:
+
+    }
+
+    if mode not in allowed_modes:
 
         mode = (
             "EMERGENCY"
@@ -1269,10 +1404,15 @@ def manifest():
         )
 
     return jsonify({
+
         "name": "ResQFlow",
+
         "short_name": "ResQFlow",
+
         "start_url": "/",
+
         "display": "standalone"
+
     })
 
 
@@ -1288,33 +1428,47 @@ def register():
     ) or {}
 
     name = str(
-        data.get("name", "")
+        data.get(
+            "name",
+            ""
+        )
     ).strip()
 
     email = str(
-        data.get("email", "")
+        data.get(
+            "email",
+            ""
+        )
     ).strip().lower()
 
     password = str(
-        data.get("password", "")
+        data.get(
+            "password",
+            ""
+        )
+    )
+
+    valid_email = re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        email
     )
 
     if (
         len(name) < 2
         or
-        not re.match(
-            r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-            email
-        )
+        not valid_email
         or
         len(password) < 6
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Enter a valid name, email and "
                 "password of at least 6 characters."
+
         }), 400
 
     connection = get_database()
@@ -1322,6 +1476,7 @@ def register():
     try:
 
         cursor = connection.execute(
+
             """
             INSERT INTO users
             (
@@ -1332,12 +1487,19 @@ def register():
             )
             VALUES (?, ?, ?, ?)
             """,
+
             (
                 name,
+
                 email,
-                generate_password_hash(password),
+
+                generate_password_hash(
+                    password
+                ),
+
                 current_time()
             )
+
         )
 
         connection.commit()
@@ -1349,20 +1511,35 @@ def register():
         connection.close()
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "An account with this email already exists."
+
         }), 409
 
-    connection.close()
+    finally:
+
+        try:
+            connection.close()
+        except Exception:
+            pass
 
     session.clear()
+
     session["user_id"] = user_id
 
     return jsonify({
+
         "success": True,
-        "message": "Account created successfully.",
-        "user": get_current_user()
+
+        "message":
+            "Account created successfully.",
+
+        "user":
+            get_current_user()
+
     })
 
 
@@ -1378,22 +1555,31 @@ def login():
     ) or {}
 
     email = str(
-        data.get("email", "")
+        data.get(
+            "email",
+            ""
+        )
     ).strip().lower()
 
     password = str(
-        data.get("password", "")
+        data.get(
+            "password",
+            ""
+        )
     )
 
     connection = get_database()
 
     user = connection.execute(
+
         """
         SELECT *
         FROM users
         WHERE email = ?
         """,
+
         (email,)
+
     ).fetchone()
 
     connection.close()
@@ -1408,18 +1594,28 @@ def login():
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Email or password is incorrect."
+
         }), 401
 
     session.clear()
+
     session["user_id"] = user["id"]
 
     return jsonify({
+
         "success": True,
-        "message": "Signed in successfully.",
-        "user": get_current_user()
+
+        "message":
+            "Signed in successfully.",
+
+        "user":
+            get_current_user()
+
     })
 
 
@@ -1433,8 +1629,12 @@ def logout():
     session.clear()
 
     return jsonify({
+
         "success": True,
-        "message": "Signed out successfully."
+
+        "message":
+            "Signed out successfully."
+
     })
 
 
@@ -1456,6 +1656,7 @@ def check_user():
 
         "user":
             user
+
     })
 
 
@@ -1480,14 +1681,19 @@ def health_check():
 
         database_ok = True
 
-    except Exception:
-        database_ok = False
+    except Exception as error:
+
+        app.logger.warning(
+            "Database health check failed: %s",
+            error
+        )
 
     return jsonify({
 
         "success": True,
 
-        "backend": "online",
+        "backend":
+            "online",
 
         "database":
             database_ok,
@@ -1500,6 +1706,7 @@ def health_check():
 
         "timestamp":
             current_time()
+
     })
 
 
@@ -1518,8 +1725,11 @@ def geocode_api():
     if len(query) < 2:
 
         return jsonify({
+
             "success": True,
+
             "items": []
+
         })
 
     try:
@@ -1530,18 +1740,29 @@ def geocode_api():
         )
 
         return jsonify({
+
             "success": True,
+
             "items": results
+
         })
 
     except Exception as error:
 
+        app.logger.exception(
+            "Geocode API failed"
+        )
+
         return jsonify({
+
             "success": False,
+
             "message":
                 "Location search failed.",
+
             "detail":
                 str(error)
+
         }), 502
 
 
@@ -1555,11 +1776,15 @@ def reverse_geocode_api():
     try:
 
         latitude = float(
-            request.args.get("lat")
+            request.args.get(
+                "lat"
+            )
         )
 
         longitude = float(
-            request.args.get("lng")
+            request.args.get(
+                "lng"
+            )
         )
 
     except (
@@ -1568,9 +1793,12 @@ def reverse_geocode_api():
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Invalid coordinates."
+
         }), 400
 
     if not (
@@ -1580,9 +1808,12 @@ def reverse_geocode_api():
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Coordinates are outside valid range."
+
         }), 400
 
     return jsonify({
@@ -1591,9 +1822,11 @@ def reverse_geocode_api():
 
         "location": {
 
-            "lat": latitude,
+            "lat":
+                latitude,
 
-            "lng": longitude,
+            "lng":
+                longitude,
 
             "display":
                 reverse_geocode(
@@ -1603,7 +1836,9 @@ def reverse_geocode_api():
 
             "source":
                 "Map selection"
+
         }
+
     })
 
 
@@ -1618,20 +1853,32 @@ def calculate_route():
         silent=True
     ) or {}
 
-    # --------------------------------------------------------
-    # Accept both selected location objects and plain text.
-    # --------------------------------------------------------
-
     start_value = (
-        data.get("start_location")
+
+        data.get(
+            "start_location"
+        )
+
         or
-        data.get("start")
+
+        data.get(
+            "start"
+        )
+
     )
 
     destination_value = (
-        data.get("destination_location")
+
+        data.get(
+            "destination_location"
+        )
+
         or
-        data.get("destination")
+
+        data.get(
+            "destination"
+        )
+
     )
 
     start = get_selected_location(
@@ -1645,91 +1892,109 @@ def calculate_route():
     if not start or not destination:
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Please select valid starting and "
                 "destination locations."
+
         }), 400
 
-    # --------------------------------------------------------
     # Same location
-    # --------------------------------------------------------
-
     if (
+
         abs(
             start["lat"]
             - destination["lat"]
         ) < 0.0000001
+
         and
+
         abs(
             start["lng"]
             - destination["lng"]
         ) < 0.0000001
+
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Start and destination cannot be the same."
+
         }), 400
 
-    # --------------------------------------------------------
     # Vehicle
-    # --------------------------------------------------------
-
     vehicle = str(
         data.get(
             "vehicle",
             "car"
         )
-    ).lower()
+    ).lower().strip()
 
     if vehicle not in {
+
         "car",
+
         "bike",
+
         "walk",
+
         "best"
+
     }:
 
         vehicle = "car"
 
-    # --------------------------------------------------------
     # Mode
-    # --------------------------------------------------------
-
     mode = normalize_mode(
         data
     )
 
+    # Emergency type
     emergency_type = str(
+
         data.get(
+
             "type",
+
             data.get(
                 "emergency_type",
                 "General"
             )
+
         )
+
     ).strip()
 
     if emergency_type not in {
+
         "Medical",
+
         "Fire",
+
         "Police",
+
         "General"
+
     }:
 
         emergency_type = "General"
 
-    # --------------------------------------------------------
-    # Select routing profiles
-    # --------------------------------------------------------
-
+    # Routing profiles
     if vehicle == "best":
 
         vehicles = [
+
             "car",
+
             "bike",
+
             "walk"
+
         ]
 
     else:
@@ -1745,43 +2010,60 @@ def calculate_route():
         for selected_vehicle in vehicles:
 
             routes = get_osrm_routes(
+
                 start,
+
                 destination,
+
                 selected_vehicle
+
             )
 
             for route_number, route in enumerate(routes):
 
                 result = analyze_route(
+
                     route,
+
                     route_number,
+
                     start["display"],
+
                     destination["display"],
+
                     selected_vehicle,
+
                     mode,
+
                     emergency_type
+
                 )
 
                 route["profile"] = selected_vehicle
 
                 combined_routes.append({
-                    "route": route,
-                    "analysis": result
+
+                    "route":
+                        route,
+
+                    "analysis":
+                        result
+
                 })
 
-        # ----------------------------------------------------
         # Sort best route first
-        # ----------------------------------------------------
-
         combined_routes.sort(
+
             key=lambda item:
                 item["analysis"]["score"]
+
         )
 
-        # Keep maximum three routes
+        # Maximum 3 routes
         combined_routes = combined_routes[:3]
 
         routes = []
+
         analysis = []
 
         for index, item in enumerate(
@@ -1789,37 +2071,43 @@ def calculate_route():
         ):
 
             route = item["route"]
+
             result = item["analysis"]
 
             result["index"] = index
 
             if index == 0:
+
                 result["status"] = "RECOMMENDED"
+
             else:
+
                 result["status"] = "ALTERNATIVE"
 
             routes.append(route)
+
             analysis.append(result)
 
         if not routes:
 
             return jsonify({
+
                 "success": False,
+
                 "message":
                     "No route could be generated."
+
             }), 502
 
         recommended_index = 0
 
-        # ----------------------------------------------------
-        # Save history
-        # ----------------------------------------------------
-
+        # Save history for logged-in user
         if session.get("user_id"):
 
             connection = get_database()
 
             connection.execute(
+
                 """
                 INSERT INTO route_history
                 (
@@ -1834,28 +2122,39 @@ def calculate_route():
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
+
                 (
                     session["user_id"],
+
                     start["display"],
+
                     destination["display"],
+
                     mode,
+
                     emergency_type,
+
                     recommended_index,
+
                     len(routes),
+
                     current_time()
+
                 )
+
             )
 
             connection.commit()
+
             connection.close()
 
-        # ----------------------------------------------------
-        # Routing source
-        # ----------------------------------------------------
-
+        # Determine routing source
         live_routes = all(
+
             route.get("source") == "OSRM"
+
             for route in routes
+
         )
 
         return jsonify({
@@ -1890,13 +2189,18 @@ def calculate_route():
                 emergency_type,
 
             "routing_source":
+
                 "OSRM"
+
                 if live_routes
+
                 else
+
                 "DEMO_FALLBACK",
 
             "message":
                 "Routes analyzed successfully."
+
         })
 
     except Exception as error:
@@ -1914,6 +2218,7 @@ def calculate_route():
 
             "detail":
                 str(error)
+
         }), 502
 
 
@@ -1928,6 +2233,7 @@ def route_history():
     connection = get_database()
 
     rows = connection.execute(
+
         """
         SELECT
             id,
@@ -1943,7 +2249,11 @@ def route_history():
         ORDER BY id DESC
         LIMIT 30
         """,
-        (session["user_id"],)
+
+        (
+            session["user_id"],
+        )
+
     ).fetchall()
 
     connection.close()
@@ -1953,14 +2263,18 @@ def route_history():
         "success": True,
 
         "items": [
+
             dict(row)
+
             for row in rows
+
         ]
+
     })
 
 
 # ============================================================
-# 29. GPS
+# 29. GPS SAVE
 # ============================================================
 
 @app.post("/api/gps")
@@ -1995,6 +2309,12 @@ def save_gps():
             "heading"
         )
 
+        if speed is not None:
+            speed = float(speed)
+
+        if heading is not None:
+            heading = float(heading)
+
     except (
         KeyError,
         TypeError,
@@ -2002,26 +2322,37 @@ def save_gps():
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Invalid GPS position."
+
         }), 400
 
     if not (
+
         -90 <= latitude <= 90
+
         and
+
         -180 <= longitude <= 180
+
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Invalid GPS coordinates."
+
         }), 400
 
     connection = get_database()
 
     connection.execute(
+
         """
         INSERT INTO gps_positions
         (
@@ -2054,23 +2385,35 @@ def save_gps():
             heading = excluded.heading,
             updated_at = excluded.updated_at
         """,
+
         (
             latitude,
+
             longitude,
+
             accuracy,
+
             speed,
+
             heading,
+
             current_time()
+
         )
+
     )
 
     connection.commit()
+
     connection.close()
 
     return jsonify({
+
         "success": True,
+
         "message":
             "GPS position updated."
+
     })
 
 
@@ -2084,6 +2427,7 @@ def get_gps():
     connection = get_database()
 
     row = connection.execute(
+
         """
         SELECT
             vehicle_id,
@@ -2096,6 +2440,7 @@ def get_gps():
         FROM gps_positions
         WHERE id = 1
         """
+
     ).fetchone()
 
     connection.close()
@@ -2103,13 +2448,20 @@ def get_gps():
     if not row:
 
         return jsonify({
+
             "success": True,
+
             "position": None
+
         })
 
     return jsonify({
+
         "success": True,
-        "position": dict(row)
+
+        "position":
+            dict(row)
+
     })
 
 
@@ -2124,18 +2476,23 @@ def run_dijkstra():
     if not DSA_PROGRAM.exists():
 
         return jsonify({
+
             "success": False,
+
             "message":
-                "Dijkstra executable was not found. "
-                "Run build_dsa.bat first."
+                "Dijkstra executable was not found."
+
         }), 400
 
     if not GRAPH_FILE.exists():
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "graph.csv was not found."
+
         }), 400
 
     data = request.get_json(
@@ -2164,9 +2521,24 @@ def run_dijkstra():
     ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Source and target must be numbers."
+
+        }), 400
+
+    # Prevent obviously invalid values
+    if source < 0 or target < 0:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Source and target cannot be negative."
+
         }), 400
 
     try:
@@ -2174,10 +2546,15 @@ def run_dijkstra():
         completed = subprocess.run(
 
             [
+
                 str(DSA_PROGRAM),
+
                 str(GRAPH_FILE),
+
                 str(source),
+
                 str(target)
+
             ],
 
             capture_output=True,
@@ -2187,6 +2564,7 @@ def run_dijkstra():
             timeout=5,
 
             cwd=str(BASE_DIR)
+
         )
 
         return jsonify({
@@ -2202,14 +2580,18 @@ def run_dijkstra():
 
             "return_code":
                 completed.returncode
+
         })
 
     except subprocess.TimeoutExpired:
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Dijkstra calculation timed out."
+
         }), 504
 
     except Exception as error:
@@ -2219,34 +2601,50 @@ def run_dijkstra():
         )
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Dijkstra module could not be executed.",
+
             "detail":
                 str(error)
+
         }), 500
 
 
 # ============================================================
-# 32. 404
+# 32. 404 HANDLER
 # ============================================================
 
 @app.errorhandler(404)
 def page_not_found(error):
 
-    # API request
-    if request.path.startswith("/api/"):
+    if request.path.startswith(
+        "/api/"
+    ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "API endpoint not found."
+
         }), 404
 
-    # Normal browser request
-    return render_template(
-        "index.html"
-    ), 404
+    try:
+
+        return render_template(
+            "index.html"
+        ), 404
+
+    except Exception:
+
+        return (
+            "ResQFlow page not found.",
+            404
+        )
 
 
 # ============================================================
@@ -2260,17 +2658,25 @@ def internal_server_error(error):
         "Internal server error"
     )
 
-    if request.path.startswith("/api/"):
+    if request.path.startswith(
+        "/api/"
+    ):
 
         return jsonify({
+
             "success": False,
+
             "message":
                 "Internal server error."
+
         }), 500
 
     return (
+
         "ResQFlow encountered an internal server error.",
+
         500
+
     )
 
 
@@ -2282,6 +2688,15 @@ if __name__ == "__main__":
 
     initialize_database()
 
+    # Cloud platforms provide PORT.
+    # Local computer defaults to 5000.
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
+    )
+
     print()
     print("=" * 60)
     print("              ResQFlow Backend")
@@ -2291,14 +2706,21 @@ if __name__ == "__main__":
     print("Dijkstra :", DSA_PROGRAM)
     print("Graph    :", GRAPH_FILE)
     print()
-    print("Server running at:")
-    print("http://127.0.0.1:5000")
+    print("Server running on port:", port)
     print()
     print("=" * 60)
 
     app.run(
-        host="127.0.0.1",
-        port=5000,
-        debug=True,
+
+        host="0.0.0.0",
+
+        port=port,
+
+        debug=os.environ.get(
+            "FLASK_DEBUG",
+            "false"
+        ).lower() == "true",
+
         use_reloader=False
+
     )
