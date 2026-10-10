@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Makes the website responsive on mobile and desktop -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#ffffff">
+
+    <meta name="description"
+          content="ResQFlow emergency route planning and traffic-aware navigation.">
+
+    <title>ResQFlow - Emergency Route Planning</title>
+
+    <!-- PWA manifest -->
+    <link rel="manifest"
+          href="{{ url_for('static', filename='manifest.webmanifest') }}">
+
+    <!-- Website icon -->
+    <link rel="icon"
+          href="{{ url_for('static', filename='img/favicon.svg') }}"
+          type="image/svg+xml">
+
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Our own CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+
+<!-- ResQFlow project-specific landing page. The dashboard remains loaded underneath. -->
+<section class="landing-page" id="landingPage" aria-labelledby="landingTitle">
+  <header class="landing-nav">
+    <a class="landing-brand" href="#top" aria-label="ResQFlow home">
+      <img src="{{ url_for('static', filename='img/resqflow-mark.svg') }}" alt="" />
+      <span><strong>ResQFlow</strong><small>Intelligent route response</small></span>
+    </a>
+    <nav class="landing-links" aria-label="Landing page navigation">
+      <a href="#landingHow">How it works</a>
+      <a href="#landingFeatures">Capabilities</a>
+    </nav>
+    <button class="landing-nav-cta" type="button" data-enter-app>Open dashboard <span aria-hidden="true">↗</span></button>
+  </header>
+
+  <main class="landing-main" id="top">
+    <section class="landing-hero">
+      <div class="landing-copy">
+        <div class="landing-kicker"><span class="live-dot"></span> ROUTE INTELLIGENCE FOR CRITICAL MOMENTS</div>
+        <h1 id="landingTitle">Every minute matters.<br><em>Make every route count.</em></h1>
+        <p class="landing-lead">Plan smarter journeys with route comparisons that consider distance, congestion, estimated signal delays and road conditions — with dedicated modes for emergency, VIP and disaster response.</p>
+        <div class="landing-actions">
+          <button class="landing-primary" type="button" data-enter-app>Plan a route <span aria-hidden="true">→</span></button>
+          <a class="landing-secondary" href="#landingHow">See how it works <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="landing-trust-row"><span><b class="trust-check">✓</b> Compare route options</span><span><b class="trust-check">✓</b> Inspect route signals</span><span><b class="trust-check">✓</b> Review trip history</span></div>
+      </div>
+
+      <div class="landing-visual">
+        <img
+          class="route-overview-image"
+          src="/static/img/route-overview-reference.png"
+          alt="ResQFlow route overview showing a green route between a start point and destination, with signal and traffic markers and route analysis details"
+          width="1408"
+          height="1024"
+          fetchpriority="high"
+        >
+      </div>
+    </section>
+
+    <section class="landing-stats" aria-label="ResQFlow features"><div><strong>04</strong><span>Travel modes</span></div><div><strong>03+</strong><span>Route options to compare*</span></div><div><strong>01</strong><span>Clear route overview</span></div><p>*When route data provides alternatives. Estimates depend on available map and traffic data.</p></section>
+
+    <section class="landing-how" id="landingHow"><div class="section-heading"><span class="landing-kicker">A CLEARER WAY TO PLAN</span><h2>From location to route in four steps.</h2><p>One workflow to help you understand the journey before you start.</p></div><div class="how-grid"><article><span class="step-number">01</span><div class="step-icon">⌖</div><h3>Set your locations</h3><p>Enter a start point and destination, or choose a point directly on the map.</p></article><article><span class="step-number">02</span><div class="step-icon">⇄</div><h3>Choose a travel mode</h3><p>Select Normal, Emergency, VIP or Disaster mode to match your trip scenario.</p></article><article><span class="step-number">03</span><div class="step-icon">⌁</div><h3>Compare route factors</h3><p>Review distance, estimated time, traffic segments and estimated signal delays.</p></article><article><span class="step-number">04</span><div class="step-icon">✓</div><h3>Inspect your route</h3><p>Select a route to highlight it, view its details and inspect markers on the map.</p></article></div></section>
+
+    <section class="landing-features" id="landingFeatures"><div><span class="landing-kicker">BUILT AROUND THE JOURNEY</span><h2>Useful details, not just a line on a map.</h2></div><div class="feature-list"><article><span>01</span><div><h3>Route comparison</h3><p>See route alternatives and compare their estimated distance, travel time and route score.</p></div></article><article><span>02</span><div><h3>Traffic and signal context</h3><p>Explore traffic segments and signal-delay estimates along the selected route.</p></div></article><article><span>03</span><div><h3>History and preferences</h3><p>Return to previous route calculations and tailor map display settings.</p></div></article></div></section>
+
+    <section class="landing-bottom-cta"><div><span class="landing-kicker">READY WHEN YOU ARE</span><h2>Start with a route. Make a more informed decision.</h2><p>Open the ResQFlow workspace to plan and compare your journey.</p></div><button class="landing-primary" type="button" data-enter-app>Open ResQFlow <span aria-hidden="true">→</span></button></section>
+  </main>
+  <footer class="landing-footer"><span>© ResQFlow · Intelligent route planning</span><span>Map data and estimates depend on available services.</span></footer>
+</section>
+
+<div class="app-shell">
+
+
+    <!-- =====================================================
+         TOP HEADER
+         ===================================================== -->
+
+    <header class="topbar">
+
+        <!-- ResQFlow logo and name -->
+        <a href="#"
+           class="brand"
+           id="brandHome"
+           aria-label="ResQFlow home">
+
+            <span class="brand-logo">
+                <img src="{{ url_for('static', filename='img/resqflow-mark.svg') }}"
+                     alt="ResQFlow logo">
+            </span>
+
+            <span class="brand-text">
+                <strong>ResQFlow</strong>
+                <small>Emergency route planning</small>
+            </span>
+
+        </a>
+
+
+        <!-- Primary workspace navigation: kept in the top navbar -->
+        <nav class="workspace-nav" aria-label="Workspace navigation">
+            <button type="button" class="workspace-nav-btn active" data-workspace-nav="home"><span aria-hidden="true">⌂</span> Home</button>
+            <button type="button" class="workspace-nav-btn" data-workspace-nav="map"><span aria-hidden="true">▦</span> Map</button>
+            <button type="button" class="workspace-nav-btn" data-workspace-nav="history"><span aria-hidden="true">◷</span> History</button>
+            <button type="button" class="workspace-nav-btn" data-workspace-nav="settings"><span aria-hidden="true">⚙</span> Settings</button>
+        </nav>
+
+        <!-- Header buttons -->
+        <div class="topbar-actions">
+
+            <!-- Route history -->
+            <button class="top-action"
+                    id="historyBtn"
+                    type="button"
+                    title="Route history"
+                    aria-label="Route history">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                    <path d="M3 4v5h5"></path>
+                    <path d="M12 7v5l3 2"></path>
+                </svg>
+
+            </button>
+
+
+            <!-- Sign in button -->
+            <button class="account-button"
+                    id="signInBtn"
+                    type="button">
+
+                Sign in
+
+            </button>
+
+
+            <!-- User account button
+                 Hidden until the user signs in -->
+            <button class="account-avatar hidden"
+                    id="accountBtn"
+                    type="button"
+                    aria-label="Account">
+
+                U
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         DESKTOP SIDEBAR
+         ===================================================== -->
+
+    <aside class="sidebar"
+           aria-label="Primary navigation">
+
+        <nav>
+
+            <!-- Home -->
+            <button class="nav-item active"
+                    id="sideHomeBtn"
+                    type="button">
+
+                <span class="nav-icon">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"></path>
+                    </svg>
+
+                </span>
+
+                <span>Home</span>
+
+            </button>
+
+
+            <!-- Map -->
+            <button class="nav-item"
+                    id="sideMapBtn"
+                    type="button">
+
+                <span class="nav-icon">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 5h16v14H4z"></path>
+                        <path d="m9 5 3 14M15 5l-3 14"></path>
+                    </svg>
+
+                </span>
+
+                <span>Map</span>
+
+            </button>
+
+
+            <!-- History -->
+            <button class="nav-item"
+                    id="sideHistoryBtn"
+                    type="button">
+
+                <span class="nav-icon">
+
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8"></circle>
+                        <path d="M12 8v4l3 2"></path>
+                    </svg>
+
+                </span>
+
+                <span>History</span>
+
+            </button>
+
+
+            <!-- Settings -->
+            <button class="nav-item"
+                    id="sideSettingsBtn"
+                    type="button">
+
+                <span class="nav-icon">
+
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.8 1.8 0 0 0 .4 2l.1.1-1.8 1.8-.1-.1a1.8 1.8 0 0 0-2-.4 1.8 1.8 0 0 0-1.1 1.6v.2h-2.6V20a1.8 1.8 0 0 0-1.1-1.6 1.8 1.8 0 0 0-2 .4l-.1.1-1.8-1.8.1-.1a1.8 1.8 0 0 0 .4-2A1.8 1.8 0 0 0 6.2 14H6v-2h.2a1.8 1.8 0 0 0 1.6-1.1 1.8 1.8 0 0 0-.4-2l-.1-.1 1.8-1.8.1.1a1.8 1.8 0 0 0 2 .4A1.8 1.8 0 0 0 12.3 6v-.2h2.6V6a1.8 1.8 0 0 0 1.1 1.6 1.8 1.8 0 0 0 2-.4l.1-.1 1.8 1.8-.1.1a1.8 1.8 0 0 0-.4 2 1.8 1.8 0 0 0 1.6 1.1h.2V14h-.2a1.8 1.8 0 0 0-1.6 1z">
+                        </path>
+                    </svg>
+
+                </span>
+
+                <span>Settings</span>
+
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAP
+         Leaflet will create the actual map here using JS.
+         ===================================================== -->
+
+    <main id="map"
+          class="map">
+    </main>
+
+
+
+    <!-- =====================================================
+         ROUTE PLANNER
+         ===================================================== -->
+
+    <section class="route-panel"
+             id="searchPanel"
+             aria-label="Route planner">
+
+
+        <!-- Panel heading -->
+        <div class="panel-head">
+
+            <div>
+
+                <div class="eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    Emergency navigation
+                </div>
+
+                <h1>Plan your route</h1>
+
+                <p>
+                    Compare routes by time, traffic and signals.
+                </p>
+
+            </div>
+
+
+            <!-- Close planner -->
+            <button class="icon-button panel-close"
+                    id="collapsePanel"
+                    type="button"
+                    title="Hide route planner"
+                    aria-label="Hide route planner">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ROUTE FORM
+             ================================================= -->
+
+        <form id="routeForm"
+              class="route-form">
+
+
+            <!-- Start and destination -->
+            <div class="location-box">
+
+
+                <!-- Starting location -->
+                <div class="location-row">
+
+                    <span class="route-point start"></span>
+
+                    <div class="field">
+
+                        <label for="startInput">
+                            From
+                        </label>
+
+                        <input
+                            id="startInput"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="Choose starting point">
+
+                        <!-- Suggestions will be added by JS -->
+                        <div id="startSuggestions"
+                             class="suggestions hidden">
+                        </div>
+
+                    </div>
+
+
+                    <!-- Select starting point on map -->
+                    <button class="field-action"
+                            type="button"
+                            data-target="start"
+                            title="Pick starting point on map">
+
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"></path>
+                            <circle cx="12" cy="9" r="2.2"></circle>
+                        </svg>
+
+                    </button>
+
+
+                    <!-- Use current location -->
+                    <button class="field-action"
+                            id="startLocate"
+                            type="button"
+                            title="Use my current location">
+
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
+                        </svg>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- Swap locations -->
+                <button class="swap-button"
+                        id="swapLocations"
+                        type="button"
+                        title="Swap start and destination">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 4v16"></path>
+                        <path d="M7 4l-3 3"></path>
+                        <path d="M7 4l3 3"></path>
+                        <path d="M17 20V4"></path>
+                        <path d="M17 20l-3-3"></path>
+                        <path d="M17 20l3-3"></path>
+                    </svg>
+
+                </button>
+
+
+
+                <!-- Destination -->
+                <div class="location-row">
+
+                    <span class="route-point end"></span>
+
+                    <div class="field">
+
+                        <label for="endInput">
+                            To
+                        </label>
+
+                        <input
+                            id="endInput"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="Choose destination">
+
+                        <!-- Destination suggestions -->
+                        <div id="endSuggestions"
+                             class="suggestions hidden">
+                        </div>
+
+                    </div>
+
+
+                    <!-- Pick destination on map -->
+                    <button class="field-action"
+                            type="button"
+                            data-target="end"
+                            title="Pick destination on map">
+
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"></path>
+                            <circle cx="12" cy="9" r="2.2"></circle>
+                        </svg>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TRAVEL MODE
+                 ================================================= -->
+
+            <div class="section-label">
+                Travel mode
+            </div>
+
+
+            <div class="mode-grid">
+
+
+                <!-- Normal -->
+                <button class="mode-pill active"
+                        type="button"
+                        data-mode="normal">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M5 16v-4l2-5h10l2 5v4"></path>
+                        <circle cx="8" cy="17" r="1.5"></circle>
+                        <circle cx="16" cy="17" r="1.5"></circle>
+                        <path d="M7 12h10"></path>
+                    </svg>
+
+                    <span>Normal</span>
+
+                </button>
+
+
+                <!-- Emergency -->
+                <button class="mode-pill"
+                        type="button"
+                        data-mode="emergency">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4v16"></path>
+                        <path d="M4 12h16"></path>
+                        <circle cx="12" cy="12" r="9"></circle>
+                    </svg>
+
+                    <span>Emergency</span>
+
+                </button>
+
+
+                <!-- VIP -->
+                <button class="mode-pill"
+                        type="button"
+                        data-mode="vip">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="m12 4 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2-3.8-3.7 5.2-.8z"></path>
+                    </svg>
+
+                    <span>VIP</span>
+
+                </button>
+
+
+                <!-- Disaster -->
+                <button class="mode-pill"
+                        type="button"
+                        data-mode="disaster">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="m12 4 9 16H3z"></path>
+                        <path d="M12 9v5"></path>
+                        <path d="M12 17v.5"></path>
+                    </svg>
+
+                    <span>Disaster</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- Actual mode value used by JavaScript -->
+            <select id="mode"
+                    class="hidden-select"
+                    aria-hidden="true">
+
+                <option value="normal">Normal</option>
+                <option value="emergency">Emergency</option>
+                <option value="vip">VIP</option>
+                <option value="disaster">Disaster</option>
+
+            </select>
+
+
+            <!-- Vehicle type -->
+            <input id="vehicle"
+                   type="hidden"
+                   value="best">
+
+
+
+            <!-- Emergency type -->
+            <div class="emergency-row hidden"
+                 id="emergencyRow">
+
+                <label for="emergencyType">
+                    Response type
+                </label>
+
+                <select id="emergencyType">
+
+                    <option value="Medical">Medical</option>
+                    <option value="Fire">Fire</option>
+                    <option value="Police">Police</option>
+                    <option value="General">General</option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- Find route button -->
+            <button class="primary-button"
+                    id="routeBtn"
+                    type="submit">
+
+                <span class="button-spinner hidden"></span>
+
+                <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="6.5"></circle>
+                    <path d="m16 16 5 5"></path>
+                </svg>
+
+                <span>Find routes</span>
+
+            </button>
+
+        </form>
+
+
+
+        <!-- Error / information message -->
+        <div id="message"
+             class="message hidden">
+        </div>
+
+
+
+        <!-- =================================================
+             ROUTE RESULTS
+             JavaScript fills this section after searching.
+             ================================================= -->
+
+        <section id="routeResults"
+                 class="route-results hidden">
+
+            <div class="results-head">
+
+                <div>
+
+                    <strong id="resultsTitle">
+                        Routes found
+                    </strong>
+
+                    <span id="resultsSubtitle">
+                        Choose the best option
+                    </span>
+
+                </div>
+
+
+                <div class="results-actions">
+
+                    <button class="text-button"
+                            id="clearBtn"
+                            type="button">
+
+                        Clear
+
+                    </button>
+
+                    <button class="sort-button"
+                            id="sortBtn"
+                            type="button">
+
+                        Best
+                        <span>↕</span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Route cards are created using JavaScript -->
+            <div id="routeCards"
+                 class="route-list">
+            </div>
+
+
+            <!-- Route legend -->
+            <div class="route-legend">
+
+                <span>
+                    <i class="legend-line recommended"></i>
+                    Recommended
+                </span>
+
+                <span>
+                    <i class="legend-line alternative"></i>
+                    Alternative
+                </span>
+
+                <span>
+                    <i class="legend-dot signal"></i>
+                    Signal
+                </span>
+
+            </div>
+
+        </section>
+
+    </section>
+
+
+
+    <!-- Button used to reopen the route planner -->
+    <button class="reopen-panel hidden"
+            id="reopenPanel"
+            type="button">
+
+        <svg viewBox="0 0 24 24">
+            <path d="M4 6h16"></path>
+            <path d="M4 12h16"></path>
+            <path d="M4 18h16"></path>
+        </svg>
+
+        <span>Route</span>
+
+    </button>
+
+
+
+    <!-- =====================================================
+         MAP SEARCH
+         ===================================================== -->
+
+    <div class="map-search"
+         id="mapSearchWrap">
+
+        <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 5 5"></path>
+        </svg>
+
+        <input id="mapSearch"
+               type="text"
+               autocomplete="off"
+               placeholder="Search on map">
+
+        <div id="mapSearchSuggestions"
+             class="suggestions map-suggestions hidden">
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAP TOOLS
+         ===================================================== -->
+
+    <div class="map-tools top-right-tools">
+
+
+        <!-- Map layer buttons -->
+        <div class="map-mode-switch"
+             role="group"
+             aria-label="Map layers">
+
+
+            <!-- Route layer -->
+            <button class="map-mode active"
+                    id="routeToggle"
+                    type="button">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M5 18V7"></path>
+                    <path d="M5 7h8a4 4 0 0 1 4 4v2"></path>
+                    <circle cx="5" cy="18" r="2"></circle>
+                    <circle cx="17" cy="13" r="2"></circle>
+                </svg>
+
+                <span>Route</span>
+
+            </button>
+
+
+            <!-- Traffic layer -->
+            <button class="map-mode active"
+                    id="trafficToggle"
+                    type="button">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 4h12v16H6z"></path>
+                    <path d="M9 8h6"></path>
+                    <path d="M9 12h6"></path>
+                    <path d="M9 16h3"></path>
+                </svg>
+
+                <span>Traffic</span>
+
+            </button>
+
+
+            <!-- Traffic signal layer -->
+            <button class="map-mode active"
+                    id="signalsToggle"
+                    type="button">
+
+                <svg viewBox="0 0 24 24">
+                    <rect x="7"
+                          y="2"
+                          width="10"
+                          height="20"
+                          rx="4">
+                    </rect>
+
+                    <circle cx="12" cy="7" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="12" cy="17" r="2"></circle>
+                </svg>
+
+                <span>Signals</span>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- Traffic information -->
+        <div class="traffic-card"
+             id="trafficCard">
+
+            <div class="traffic-title">
+
+                <strong>Traffic</strong>
+
+                <span class="live-pill">
+                    <i></i>
+                    Analysis
+                </span>
+
+            </div>
+
+            <span>
+                <i class="traffic-dot smooth"></i>
+                Free flow
+            </span>
+
+            <span>
+                <i class="traffic-dot moderate"></i>
+                Moderate
+            </span>
+
+            <span>
+                <i class="traffic-dot heavy"></i>
+                Heavy
+            </span>
+
+            <span>
+                <i class="traffic-dot blocked"></i>
+                Blocked
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAP STYLE SWITCH
+         ===================================================== -->
+
+    <div class="map-style-card"
+         id="satelliteToggle"
+         role="button"
+         tabindex="0"
+         aria-pressed="false"
+         title="Switch between map and satellite">
+
+        <div class="satellite-preview"></div>
+
+        <div class="map-style-copy">
+
+            <strong>Satellite</strong>
+            <span>Map view</span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAP CONTROLS
+         ===================================================== -->
+
+    <div class="map-controls"
+         aria-label="Map controls">
+
+
+        <!-- Current location -->
+        <button id="locateBtn"
+                type="button"
+                title="My location">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+                <path d="M12 2v4"></path>
+                <path d="M12 18v4"></path>
+                <path d="M2 12h4"></path>
+                <path d="M18 12h4"></path>
+            </svg>
+
+        </button>
+
+
+        <!-- Zoom controls -->
+        <div class="zoom-stack">
+
+            <button id="zoomIn"
+                    type="button"
+                    title="Zoom in">
+
+                +
+
+            </button>
+
+            <button id="zoomOut"
+                    type="button"
+                    title="Zoom out">
+
+                −
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAP STATUS
+         ===================================================== -->
+
+    <div class="map-status"
+         id="mapStatus">
+
+        <span class="status-dot"></span>
+
+        <div>
+
+            <strong>
+                ResQFlow routing online
+            </strong>
+
+            <small id="routingSource">
+                Ready for a route
+            </small>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ROUTE DETAILS
+         ===================================================== -->
+
+    <section class="detail-sheet hidden"
+             id="detailSheet"
+             aria-label="Route details">
+
+
+        <!-- Details heading -->
+        <div class="sheet-header">
+
+            <div>
+
+                <span class="detail-kicker">
+                    Selected route
+                </span>
+
+                <h2 id="detailTitle">
+                    Recommended route
+                </h2>
+
+                <p id="detailSubtitle">
+                    Traffic-aware route analysis
+                </p>
+
+            </div>
+
+
+            <div class="sheet-actions">
+
+                <span class="route-badge green"
+                      id="detailBadge">
+
+                    RECOMMENDED
+
+                </span>
+
+                <button class="icon-button"
+                        id="closeDetails"
+                        type="button"
+                        title="Close route details">
+
+                    ×
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Route summary -->
+        <div class="metric-grid">
+
+            <div class="metric">
+                <span>Distance</span>
+                <strong id="sumDistance">—</strong>
+            </div>
+
+            <div class="metric">
+                <span>ETA</span>
+                <strong id="sumTime">—</strong>
+            </div>
+
+            <div class="metric">
+                <span>Traffic</span>
+                <strong id="sumTraffic"
+                        class="good">
+                    —
+                </strong>
+            </div>
+
+            <div class="metric">
+                <span>Signals</span>
+                <strong id="sumSignals">—</strong>
+            </div>
+
+            <div class="metric">
+                <span>Signal delay</span>
+                <strong id="sumDelay">—</strong>
+            </div>
+
+        </div>
+
+
+
+        <!-- Detailed information -->
+        <div class="detail-lower">
+
+
+            <!-- Turn-by-turn directions -->
+            <div class="directions-card">
+
+                <div class="subhead">
+
+                    <strong>Directions</strong>
+
+                    <span id="directionCount">
+                        Route steps
+                    </span>
+
+                </div>
+
+                <div class="turn-list"
+                     id="turnList">
+                </div>
+
+            </div>
+
+
+
+            <!-- Route analysis -->
+            <div class="analysis-card">
+
+                <div class="subhead">
+
+                    <strong>Route analysis</strong>
+
+                    <span>
+                        Why this route
+                    </span>
+
+                </div>
+
+
+                <!-- Factors are added by JavaScript -->
+                <div id="factorRows"
+                     class="factor-list">
+                </div>
+
+
+                <!-- Signal information -->
+                <div class="signal-note">
+
+                    <span class="signal-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect x="7"
+                                  y="2"
+                                  width="10"
+                                  height="20"
+                                  rx="4">
+                            </rect>
+
+                            <circle cx="12" cy="7" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="17" r="2"></circle>
+
+                        </svg>
+
+                    </span>
+
+                    <span id="signalNote">
+                        Signal timing is estimated by ResQFlow.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MOBILE NAVIGATION
+         ===================================================== -->
+
+    <nav class="mobile-nav"
+         aria-label="Mobile navigation">
+
+
+        <!-- Mobile Home -->
+        <button class="active"
+                id="mobileHomeBtn"
+                type="button">
+
+            <svg viewBox="0 0 24 24">
+                <path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"></path>
+            </svg>
+
+            <span>Home</span>
+
+        </button>
+
+
+        <!-- Mobile Map -->
+        <button id="mobileMapBtn"
+                type="button">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M4 5h16v14H4z"></path>
+                <path d="m9 5 3 14M15 5l-3 14"></path>
+            </svg>
+
+            <span>Map</span>
+
+        </button>
+
+
+        <!-- Mobile History -->
+        <button id="mobileHistoryBtn"
+                type="button">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8"></circle>
+                <path d="M12 8v4l3 2"></path>
+            </svg>
+
+            <span>History</span>
+
+        </button>
+
+
+        <!-- Mobile Settings -->
+        <button id="mobileSettingsBtn"
+                type="button">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19 15a2 2 0 0 0 .4 2l-1.6 1.6a2 2 0 0 0-2-.4 2 2 0 0 0-1.2 1.8h-2.3a2 2 0 0 0-1.2-1.8 2 2 0 0 0-2 .4L6.5 17a2 2 0 0 0 .4-2A2 2 0 0 0 5 13.8v-3.6A2 2 0 0 0 6.9 9a2 2 0 0 0-.4-2L8.1 5.4a2 2 0 0 0 2 .4A2 2 0 0 0 11.3 4h2.3a2 2 0 0 0 1.2 1.8 2 2 0 0 0 2-.4L19.4 7a2 2 0 0 0-.4 2 2 0 0 0 1.9 1.2v3.6A2 2 0 0 0 19 15Z"></path>
+            </svg>
+
+            <span>Settings</span>
+
+        </button>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         LOGIN / REGISTER MODAL
+         ===================================================== -->
+
+    <div class="modal hidden"
+         id="authModal">
+
+        <div class="modal-card auth-card">
+
+
+            <!-- Close button -->
+            <button class="modal-close"
+                    data-close="authModal"
+                    type="button">
+
+                ×
+
+            </button>
+
+
+            <!-- Account heading -->
+            <div class="modal-brand">
+
+                <img src="{{ url_for('static', filename='img/resqflow-mark.svg') }}"
+                     alt="ResQFlow logo">
+
+                <div>
+
+                    <strong>
+                        ResQFlow account
+                    </strong>
+
+                    <span>
+                        Save routes and access history.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Login / Register tabs -->
+            <div class="auth-tabs">
+
+                <button id="loginTab"
+                        class="active"
+                        type="button">
+
+                    Sign in
+
+                </button>
+
+                <button id="registerTab"
+                        type="button">
+
+                    Create account
+
+                </button>
+
+            </div>
+
+
+
+            <!-- Authentication form -->
+            <form id="authForm">
+
+
+                <!-- Name is shown only while registering -->
+                <div id="nameField"
+                     class="hidden">
+
+                    <label for="authName">
+                        Name
+                    </label>
+
+                    <input id="authName"
+                           type="text"
+                           placeholder="Your name">
+
+                </div>
+
+
+                <!-- Email -->
+                <label for="authEmail">
+                    Email
+                </label>
+
+                <input id="authEmail"
+                       type="email"
+                       placeholder="you@example.com"
+                       required>
+
+
+                <!-- Password -->
+                <label for="authPassword">
+                    Password
+                </label>
+
+                <input id="authPassword"
+                       type="password"
+                       placeholder="At least 6 characters"
+                       required>
+
+
+                <!-- Submit -->
+                <button class="primary-button"
+                        type="submit">
+
+                    <span id="authSubmit">
+                        Sign in
+                    </span>
+
+                    <span>→</span>
+
+                </button>
+
+            </form>
+
+
+            <!-- Login/register messages -->
+            <div id="authMessage"
+                 class="message hidden">
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ROUTE HISTORY MODAL
+         ===================================================== -->
+
+    <div class="modal hidden"
+         id="historyModal">
+
+        <div class="modal-card wide">
+
+
+            <button class="modal-close"
+                    data-close="historyModal"
+                    type="button">
+
+                ×
+
+            </button>
+
+
+            <div class="modal-head">
+
+                <div>
+
+                    <strong>
+                        Route history
+                    </strong>
+
+                    <span>
+                        Saved routes from your ResQFlow account.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Saved routes will be inserted here -->
+            <div id="historyList"
+                 class="history-list">
+
+                <div class="empty-state">
+                    No saved routes yet.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SETTINGS MODAL
+         ===================================================== -->
+
+    <div class="modal hidden"
+         id="settingsModal">
+
+        <div class="modal-card settings-card">
+
+
+            <button class="modal-close"
+                    data-close="settingsModal"
+                    type="button">
+
+                ×
+
+            </button>
+
+
+            <div class="modal-head">
+
+                <div>
+
+                    <strong>
+                        Map settings
+                    </strong>
+
+                    <span>
+                        Choose how ResQFlow behaves.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="settings-list">
+
+
+                <!-- Default travel mode -->
+                <label class="setting-row">
+
+                    <span>
+
+                        <strong>
+                            Default travel mode
+                        </strong>
+
+                        <small>
+                            Used for new route searches.
+                        </small>
+
+                    </span>
+
+                    <select id="settingsMode">
+
+                        <option value="normal">
+                            Normal
+                        </option>
+
+                        <option value="emergency">
+                            Emergency
+                        </option>
+
+                        <option value="vip">
+                            VIP
+                        </option>
+
+                        <option value="disaster">
+                            Disaster
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+
+                <!-- Traffic layer -->
+                <label class="setting-row">
+
+                    <span>
+
+                        <strong>
+                            Traffic layer
+                        </strong>
+
+                        <small>
+                            Show traffic colors on routes.
+                        </small>
+
+                    </span>
+
+                    <input id="settingsTraffic"
+                           class="setting-toggle"
+                           type="checkbox"
+                           checked>
+
+                </label>
+
+
+
+                <!-- Traffic signals -->
+                <label class="setting-row">
+
+                    <span>
+
+                        <strong>
+                            Traffic signals
+                        </strong>
+
+                        <small>
+                            Show estimated signal points.
+                        </small>
+
+                    </span>
+
+                    <input id="settingsSignals"
+                           class="setting-toggle"
+                           type="checkbox"
+                           checked>
+
+                </label>
+
+
+
+                <!-- Route planner -->
+                <label class="setting-row">
+
+                    <span>
+
+                        <strong>
+                            Open planner on Home
+                        </strong>
+
+                        <small>
+                            Keep the route planner visible.
+                        </small>
+
+                    </span>
+
+                    <input id="settingsPanel"
+                           class="setting-toggle"
+                           type="checkbox"
+                           checked>
+
+                </label>
+
+            </div>
+
+
+
+            <!-- Save settings -->
+            <button id="saveSettings"
+                    class="primary-button"
+                    type="button">
+
+                <span>
+                    Save settings
+                </span>
+
+                <span>✓</span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ACCOUNT POPUP
+         ===================================================== -->
+
+    <div class="account-popover hidden"
+         id="accountPopover">
+
+
+        <div class="account-popover-head">
+
+            <span class="account-avatar small"
+                  id="popoverAvatar">
+
+                U
+
+            </span>
+
+
+            <div>
+
+                <strong id="popoverName">
+                    ResQFlow user
+                </strong>
+
+                <small id="popoverEmail">
+                    Signed in
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- History -->
+        <button id="popoverHistory"
+                type="button">
+
+            Route history
+
+        </button>
+
+
+        <!-- Logout -->
+        <button id="logoutBtn"
+                type="button">
+
+            Sign out
+
+        </button>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT LIBRARIES
+     ========================================================= -->
+
+<!-- Leaflet map library -->
+<script>
+(function () {
+  const landing = document.getElementById("landingPage");
+  function enterApp() {
+    if (!landing) return;
+    landing.classList.add("landing-exit");
+    window.setTimeout(function () {
+      landing.classList.add("hidden");
+      document.body.classList.add("app-entered");
+      if (window.map && typeof window.map.invalidateSize === "function") {
+        window.map.invalidateSize({ pan: false });
+      }
+      window.dispatchEvent(new Event("resize"));
+      const start = document.getElementById("startInput");
+      if (start) start.focus({ preventScroll: true });
+    }, 180);
+  }
+  document.querySelectorAll("[data-enter-app]").forEach(function (button) {
+    button.addEventListener("click", enterApp);
+  });
+  document.querySelectorAll(".landing-links a").forEach(function (link) {
+    link.addEventListener("click", function (event) {
+      const target = document.querySelector(link.getAttribute("href"));
+      if (target) { event.preventDefault(); target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    });
+  });
+  // Top navigation delegates to the existing, tested dashboard handlers.
+  const navTargets = { home: "sideHomeBtn", map: "sideMapBtn", history: "sideHistoryBtn", settings: "sideSettingsBtn" };
+  document.querySelectorAll("[data-workspace-nav]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const key = button.getAttribute("data-workspace-nav");
+      if (landing && !landing.classList.contains("hidden")) enterApp();
+      document.querySelectorAll("[data-workspace-nav]").forEach(function (item) {
+        item.classList.toggle("active", item === button);
+      });
+      const target = document.getElementById(navTargets[key]);
+      if (target) window.setTimeout(function () { target.click(); }, 200);
+    });
+  });
+
+  // Lightweight interactive feature slider on the landing page.
+  const featureItems = Array.from(document.querySelectorAll(".how-grid article"));
+  if (featureItems.length > 1) {
+    featureItems.forEach(function (item, index) {
+      item.setAttribute("tabindex", "0");
+      item.setAttribute("role", "button");
+      item.setAttribute("aria-label", "Highlight workflow step " + (index + 1));
+      item.addEventListener("click", function () {
+        featureItems.forEach(function (other) { other.classList.remove("step-highlight"); });
+        item.classList.add("step-highlight");
+      });
+      item.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); item.click(); }
+      });
+    });
+  }
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && landing && !landing.classList.contains("hidden")) enterApp();
+  });
+})();
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<!-- ResQFlow JavaScript -->
+<script src="{{ url_for('static', filename='js/app.js') }}">
+</script>
+
+
+</body>
+</html>
